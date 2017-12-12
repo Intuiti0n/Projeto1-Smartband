@@ -14,7 +14,7 @@ static float xv[NZEROS + 1], yv[NPOLES + 1];
 static volatile unsigned long sensorValue = 0;        // will store ADC value from sensor
 static volatile signed long long int outputValue=0;
 static volatile int bpm=0;
-static volatile int bpm_calc=0;
+static volatile long int bpm_calc=0;
 static signed long long int filterloop()
 {
     xv[0] = xv[1]; xv[1] = xv[2]; xv[2] = xv[3]; xv[3] = xv[4];
@@ -24,21 +24,31 @@ static signed long long int filterloop()
     outputValue =(long int) yv[4];
     return outputValue;
 }
-
+/*
 #define BEATS 5
 
 void detect_bpm(long long int resultado){
-  unsigned long long int tempo=millis();
+  unsigned long long int tempo=millis(),tempo1=0,tempo2=0;
   static long long int last_value=0;
-  
+  static char flag=0;
   if(resultado==0||(resultado>=0&&last_value<0)){
     bpm=bpm+1;
+    if(bpm%10==0){
+      flag=1;
+      tempo2=tempo;
+    }
+    if(bpm%5==0&&flag!=1) {
+       tempo1=tempo;
+    }
+    if(tempo1!=0&&tempo2!=0){
+      bpm_calc=abs(tempo2-tempo1);
+      tempo1=0;tempo2=0;
+      flag=0;
+    }
   }
     last_value=resultado;
 }
-void setup() {
-  Serial.begin(115200);
-}
+
 
 void loop() {
   unsigned long currentMillis = millis();
@@ -52,24 +62,42 @@ void loop() {
     signed long long int result=filterloop();
     detect_bpm(result);
     //Serial.print((double)result);
-    //Serial.print(" ");
-    Serial.println(bpm_calc);
-    
   }
-  if (tempo_atual - tempo_anterior >= 6000) {
-    static int i=0;
-    tempo_anterior=tempo_atual;
-    static int bpm_anterior=0;
-    static int bpm_anterior2=0;
-    bpm_calc=(bpm-bpm_anterior)*10;
-    bpm_anterior=bpm;
-    if(i%2==0) {
-      bpm_calc=(bpm-bpm_anterior2)*5;
-      bpm_anterior2=bpm_anterior;}
-      
-    //Serial.print(" ");
-    //Serial.println(bpm_calc);
+
+  if (tempo_atual - tempo_anterior >= 1000) {
+    float result=300/(bpm_calc);
+    Serial.print(" ");
+    Serial.println(result);
   }
 }
+*/
 
+void detect_bpm(long long int resultado){
+  unsigned long long int tempo=millis(),tempo1=0,tempo2=0;
+  static long long int last_value=0;
+  static char flag=0;
+  if(resultado==0||(resultado>=0&&last_value<0)){
+    bpm=bpm+1;
+  }
+    last_value=resultado;
+}
+
+
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= 10) {
+    // save the last time you blinked the LED
+    previousMillis = currentMillis;
+    // set the LED with the ledState of the variable:
+    sensorValue=analogRead(A0);
+    //Serial.println(sensorValue);
+    signed long long int result=filterloop();
+    detect_bpm(result);
+    //Serial.print((double)result);
+  }
+}
 
