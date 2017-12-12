@@ -1,8 +1,7 @@
 /* DANIEL GOMES A74729
  *  TESTE AMOSTRAGEM 10 MS COM FILTRO
  *  FILTRO BUTTERWORTH 2A ORDEM, FC=0,5Hz E FC=10Hz
-/ *  Digital filter designed by mkfilter/mkshape/gencode   A.J. Fisher
-Command line: /www/usr/fisher/helpers/mkfilter -Bu -Bp -o 2 -a 5.0000000000e-03 1.0000000000e-01 -l */
+/ *  Digital filter designed by mkfilter/mkshape/gencode   A.J. Fisher*/
 
 #define NZEROS 4
 #define NPOLES 4
@@ -29,7 +28,6 @@ int calcular_media(long int vec[]){
   //float batimentos= vec[0]+vec[1]+vec[2]+vec[3]+vec[4];
   float batimentos= (vec[4]-vec[3])+(vec[3]-vec[2])+(vec[2]-vec[1])+(vec[1]-vec[0]);
   batimentos=batimentos/4000;
-  //Serial.println(batimentos);
   return (int)(batimentos*60);
 }
 void detect_bpm(long long int resultado){
