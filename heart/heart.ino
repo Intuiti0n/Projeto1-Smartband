@@ -9,7 +9,7 @@ Command line: /www/usr/fisher/helpers/mkfilter -Bu -Bp -o 2 -a 5.0000000000e-03 
 #define GAIN   1.587070257e+01
 
 unsigned long previousMillis = 0;        // will store last time LED was updated
-unsigned long tempo_anterior = 0;        // will store last time LED was updated
+//unsigned long tempo_anterior = 0;        // will store last time LED was updated
 static float xv[NZEROS + 1], yv[NPOLES + 1];
 static volatile unsigned long sensorValue = 0;        // will store ADC value from sensor
 static volatile signed long long int outputValue=0;
@@ -24,60 +24,27 @@ static signed long long int filterloop()
     outputValue =(long int) yv[4];
     return outputValue;
 }
-/*
-#define BEATS 5
 
+int calcular_media(long int vec[]){
+  //float batimentos= vec[0]+vec[1]+vec[2]+vec[3]+vec[4];
+  float batimentos= (vec[4]-vec[3])+(vec[3]-vec[2])+(vec[2]-vec[1])+(vec[1]-vec[0]);
+  batimentos=batimentos/4000;
+  //Serial.println(batimentos);
+  return (int)(batimentos*60);
+}
 void detect_bpm(long long int resultado){
   unsigned long long int tempo=millis(),tempo1=0,tempo2=0;
   static long long int last_value=0;
   static char flag=0;
+  static long int vec[5]={0};
+  static int i=0;
   if(resultado==0||(resultado>=0&&last_value<0)){
     bpm=bpm+1;
-    if(bpm%10==0){
-      flag=1;
-      tempo2=tempo;
-    }
-    if(bpm%5==0&&flag!=1) {
-       tempo1=tempo;
-    }
-    if(tempo1!=0&&tempo2!=0){
-      bpm_calc=abs(tempo2-tempo1);
-      tempo1=0;tempo2=0;
-      flag=0;
-    }
+    vec[i++]=tempo;
   }
-    last_value=resultado;
-}
-
-
-void loop() {
-  unsigned long currentMillis = millis();
-  unsigned long tempo_atual = millis();
-  if (currentMillis - previousMillis >= 10) {
-    // save the last time you blinked the LED
-    previousMillis = currentMillis;
-    // set the LED with the ledState of the variable:
-    sensorValue=analogRead(A0);
-    //Serial.println(sensorValue);
-    signed long long int result=filterloop();
-    detect_bpm(result);
-    //Serial.print((double)result);
-  }
-
-  if (tempo_atual - tempo_anterior >= 1000) {
-    float result=300/(bpm_calc);
-    Serial.print(" ");
-    Serial.println(result);
-  }
-}
-*/
-
-void detect_bpm(long long int resultado){
-  unsigned long long int tempo=millis(),tempo1=0,tempo2=0;
-  static long long int last_value=0;
-  static char flag=0;
-  if(resultado==0||(resultado>=0&&last_value<0)){
-    bpm=bpm+1;
+  if(i==5){
+    bpm_calc=calcular_media(vec);
+    i=0;
   }
     last_value=resultado;
 }
@@ -97,7 +64,11 @@ void loop() {
     //Serial.println(sensorValue);
     signed long long int result=filterloop();
     detect_bpm(result);
+    
     //Serial.print((double)result);
+    //Serial.print(" ");
+    Serial.println(bpm_calc);
+    
   }
 }
 
