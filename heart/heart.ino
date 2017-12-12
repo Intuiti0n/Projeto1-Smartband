@@ -50,12 +50,26 @@ void loop() {
     sensorValue=analogRead(A0);
     //Serial.println(sensorValue);
     signed long long int result=filterloop();
-    Serial.print((double)result);
-    Serial.print(" ");
+    detect_bpm(result);
+    //Serial.print((double)result);
+    //Serial.print(" ");
     Serial.println(bpm_calc);
     
   }
-  
+  if (tempo_atual - tempo_anterior >= 6000) {
+    static int i=0;
+    tempo_anterior=tempo_atual;
+    static int bpm_anterior=0;
+    static int bpm_anterior2=0;
+    bpm_calc=(bpm-bpm_anterior)*10;
+    bpm_anterior=bpm;
+    if(i%2==0) {
+      bpm_calc=(bpm-bpm_anterior2)*5;
+      bpm_anterior2=bpm_anterior;}
+      
+    //Serial.print(" ");
+    //Serial.println(bpm_calc);
+  }
 }
 
 
