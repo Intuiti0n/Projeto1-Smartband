@@ -25,9 +25,8 @@ static signed long long int filterloop()
 }
 
 int calcular_media(long int vec[]){
-  //float batimentos= vec[0]+vec[1]+vec[2]+vec[3]+vec[4];
   float batimentos= (vec[4]-vec[3])+(vec[3]-vec[2])+(vec[2]-vec[1])+(vec[1]-vec[0]);
-  batimentos=batimentos/4000;
+  batimentos=batimentos/4000;///4 porque é a media de 4 pulsos e esta em milisegundos (1000) explica o pq de /(4*1000)
   return (int)(batimentos*60);
 }
 void detect_bpm(long long int resultado){
@@ -42,6 +41,9 @@ void detect_bpm(long long int resultado){
   }
   if(i==5){
     bpm_calc=calcular_media(vec);
+    static long int bpm_anterior=30;
+    if(bpm_calc<30) bpm_calc=bpm_anterior;
+    else bpm_anterior= bpm_calc;
     i=0;
   }
     last_value=resultado;
@@ -63,10 +65,10 @@ void loop() {
     signed long long int result=filterloop();
     detect_bpm(result);
 
-    Serial.println(sensorValue);
-    //Serial.print((double)result);
-    //Serial.print(" ");
-    //Serial.println(bpm_calc);
+    //Serial.println(sensorValue);
+    Serial.print((double)result);
+    Serial.print(" ");
+    Serial.println(bpm_calc);
     
   }
 }
