@@ -62,10 +62,11 @@ void loop() {
     //Serial.println(sensorValue);
     signed long long int result=filterloop();
     detect_bpm(result);
-    
-    //Serial.print((double)result);
+
+    Serial.println(sensorValue);
+    //Serial.println((double)result);
     //Serial.print(" ");
-    Serial.println(bpm_calc);
+    //Serial.println(bpm_calc);
     
   }
 }
