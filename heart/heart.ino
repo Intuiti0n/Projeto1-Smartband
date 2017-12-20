@@ -64,7 +64,7 @@ void loop() {
     detect_bpm(result);
 
     Serial.println(sensorValue);
-    //Serial.println((double)result);
+    //Serial.print((double)result);
     //Serial.print(" ");
     //Serial.println(bpm_calc);
     
