@@ -112,7 +112,9 @@ void loop() {
   counterX();// CHAMAR A ROTINA DE CONTAR OS PASSOS
   counterZ();// CHAMAR A ROTINA DE CONTAR OS PASSOS
   //ENVIAR POR BLUETOOTH OS DADOS
-  Serial.print(" | AcY = "); Serial.println(AcY);
-  Serial.print(" | Counter = "); Serial.println(counter1);
+  //Serial.print(" | AcY = "); Serial.println(AcY);
+  Serial.print(" | CounterY = "); Serial.println(counter1);
+  Serial.print(" | CounterX = "); Serial.println(counter2);
+  Serial.print(" | CounterZ = "); Serial.println(counter3);
   delay(333);//ANALIZAR ESTE DELAY PARA ENTENDER A SUA EXISTENCIA
 }
