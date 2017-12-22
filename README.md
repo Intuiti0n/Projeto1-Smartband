@@ -20,8 +20,9 @@ Resistencias 1/4W<br>
 Condensadores ceramicos<br>
 <img src="http://rees52.com/481-large_default/1-%CE%BCf-ceramic-capacitor-104-.jpg" alt="Condensadores ceramicos">
 Amplificador LM358N<br>
-<img src="https://cdn.sparkfun.com//assets/parts/2/7/8/8/09456-01.jpg" alt="Amplificador LM358N">
-<img src="http://vakits.com/sites/default/files/imagecache/product_full/LM358%20pinout.JPG" alt="Amplificador LM358N datasheet">
+<p align="center">
+<img src="https://cdn.sparkfun.com//assets/parts/2/7/8/8/09456-01.jpg" alt="Amplificador LM358N" height="300"><img src="http://vakits.com/sites/default/files/imagecache/product_full/LM358%20pinout.JPG" alt="Amplificador LM358N datasheet" height="300">
+</p>
 LDR 10K<br>
 <img src="https://potentiallabs.com/cart/image/cache/catalog/LDR%20(BIG)-500x416.jpg" alt="LDR">
 <h3>Para o sensor de passos:</h3>
