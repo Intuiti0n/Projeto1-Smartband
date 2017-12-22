@@ -10,14 +10,8 @@
      OS PINOS QUE NAO ESTAO INDICADOS DEVEM SER DEIXADOS DESLIGADOS
      PASSWORD DEFAULT: 1234
      BAUD RATE FOI ALTERADO PARA 115200 USANDO AT COMMANDS
-*/
-/*
-  #include <SoftwareSerial.h>
-  SoftwareSerial BTserial(2, 3); // RX | TX
-  // Connect the HC-05 TX to Arduino pin 2 RX.
-  // Connect the HC-05 RX to Arduino pin 3 TX through a voltage divider.
-  // Connect the HC-05 STATE pin to Arduino pin 4.
-  //
+
+     TIRAR OS PINOS DO TX E RX DO ARDUINO ANTES DE CARREGAR NOVO CODIGO PARA A PLACA OU VAO OCORRER ERROS DE SINCRONIZAÇÃO
 */
 char c = ' ';
 
@@ -48,10 +42,6 @@ void setup()
 
   Serial.println("HC-05 is now connected");
   Serial.println("");
-
-  // Start serial communication with the bluetooth module
-  // HC-05 default serial speed for communication mode is 9600 but can be different
-  //BTserial.begin(115200);
 }
 
 void loop()
