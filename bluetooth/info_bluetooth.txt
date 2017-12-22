@@ -1,0 +1,4 @@
+Bluetooth used: HC-05
+6 pins
+Default password: 1234
+Default baud rate: 9600 bps
