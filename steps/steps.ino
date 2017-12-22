@@ -25,7 +25,7 @@
 #include <SoftwareSerial.h>
 const int MPU_addr = 0x68; // I2C address of the MPU-6050
 int16_t AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
-static volatile int counter1 = 0, last = 0;
+static volatile int counter1 = 0, last = 0,counter2=0,counter3=0;
 
 // BTconnected will = false when not connected and true when connected
 boolean BTconnected = false;
@@ -62,7 +62,7 @@ void setup() {
 }
 
 //ROTINA DE CONTAGEM DOS PASSOS, MELHORAR ISTO PARA DETETAR MELHOR
-void counter()
+void counterY()
 {
   static bool flag = false;
   if (AcY >= -15000) flag = true;
@@ -70,6 +70,28 @@ void counter()
   {
     flag = false;
     counter1 += 1;
+  }
+}
+
+void counterX()
+{
+  static bool flag = false;
+  if (AcY >= -15000) flag = true;
+  if (flag && AcY < -16000)
+  {
+    flag = false;
+    counter2 += 1;
+  }
+}
+
+void counterZ()
+{
+  static bool flag = false;
+  if (AcY >= -15000) flag = true;
+  if (flag && AcY < -16000)
+  {
+    flag = false;
+    counter3 += 1;
   }
 }
 
@@ -86,8 +108,9 @@ void loop() {
   GyX = Wire.read() << 8 | Wire.read(); // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
   GyY = Wire.read() << 8 | Wire.read(); // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
   GyZ = Wire.read() << 8 | Wire.read(); // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
-  counter();// CHAMAR A ROTINA DE CONTAR OS PASSOS
-
+  counterY();// CHAMAR A ROTINA DE CONTAR OS PASSOS
+  counterX();// CHAMAR A ROTINA DE CONTAR OS PASSOS
+  counterZ();// CHAMAR A ROTINA DE CONTAR OS PASSOS
   //ENVIAR POR BLUETOOTH OS DADOS
   Serial.print(" | AcY = "); Serial.println(AcY);
   Serial.print(" | Counter = "); Serial.println(counter1);
