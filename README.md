@@ -1,33 +1,37 @@
 # Projeto 1 - SmartBand
 
-OBJETIVOS: 
--ConceÁ„o, implementaÁ„o e teste do sensor de batimento cardÌaco
--ImplementaÁ„o em PCB
--VisualizaÁ„o de dados em tempo real, pulsaÁ„o vista no pc, BPM por bluetooth
--teste e possÌvel implementaÁ„o no projeto de filtros digitais
--implementaÁ„o dos circuitos numa bracelete
--conceÁ„o, implementaÁ„o e teste do acelerÛmetro (passos), visualizaÁ„o dos dados no pc
--implementaÁ„o de um ecr„ oled
--visualizaÁ„o dos dados num dispositivo mÛvel (Bluetooth)
-
-Material utilizado:
-Para o sensor de pulsaÁ„o:
-Resistencias 1/4W
-Condensadores ceramicos
-Amplificador LM358N
-LDR 10K
-
-Para o sensor de passos:
-MPU-6050
-
-Para o bluetooth:
-HC-05
-
-Para o ecra: ecra oled 0,91' 
-
-MICROCONTROLADOR:
-ARDUINO UNO, na fase de desenvolvimento,
-ARDUINO MINI PRO na fase final
+<h1>OBJETIVOS:</h1> 
+<ul>
+<li>Conce√ß√£o, implementa√ß√£o e teste do sensor de batimento card√≠aco. </li>
+  <li>Implementa√ß√£o em PCB</li>
+  <li>Visualiza√ß√£o de dados em tempo real, pulsa√ß√£o vista no pc, BPM por bluetooth</li>
+  <li>teste e poss√≠vel implementa√ß√£o no projeto de filtros digitais</li>
+ <li>implementa√ß√£o dos circuitos numa bracelete</li>
+  <li>teste e poss√≠vel implementa√ß√£o no projeto de filtros digitais</li>
+<li>conce√ß√£o, implementa√ß√£o e teste do aceler√≥metro (passos), visualiza√ß√£o dos dados no pc</li>
+<li> implementa√ß√£o de um ecr√£ oled</li>
+<li>visualiza√ß√£o dos dados num dispositivo m√≥vel (Bluetooth)</ul>
 
 
-<img src="https://furtaev.ru/preview/heart_rate_in_smartwatch.png" alt="Smartwatch heartbeat">
+<h2>Material utilizado:</h2>
+<h3>Para o sensor de pulsa√ß√£o:</h3>
+Resistencias 1/4W<br>
+<img src="https://images-na.ssl-images-amazon.com/images/I/41RfND0SwbL._SX342_.jpg" alt="Resistencias 1/4W">
+Condensadores ceramicos<br>
+<img src="http://rees52.com/481-large_default/1-%CE%BCf-ceramic-capacitor-104-.jpg" alt="Condensadores ceramicos">
+Amplificador LM358N<br>
+<img src="https://cdn.sparkfun.com//assets/parts/2/7/8/8/09456-01.jpg" alt="Amplificador LM358N">
+<img src="http://vakits.com/sites/default/files/imagecache/product_full/LM358%20pinout.JPG" alt="Amplificador LM358N datasheet">
+LDR 10K<br>
+<img src="https://potentiallabs.com/cart/image/cache/catalog/LDR%20(BIG)-500x416.jpg" alt="LDR">
+<h3>Para o sensor de passos:</h3>
+MPU-6050<br>
+
+<h3>Para o bluetooth:</h3>
+HC-05<br>
+
+<h3>Para o ecra: ecra oled 0,91'</h3>
+
+<h3>MICROCONTROLADOR:<br>
+ARDUINO UNO, na fase de desenvolvimento<br>
+ARDUINO MINI PRO na fase final<br>
