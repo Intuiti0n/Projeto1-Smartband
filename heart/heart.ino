@@ -90,9 +90,9 @@ void loop() {
     detect_bpm(result);
 
     //Serial.println(sensorValue);//valor lido diretamente do hardware
-    //Serial.print((double)result);//valor de saida do filtro digital
+    Serial.println((double)result);//valor de saida do filtro digital
     //Serial.print(" ");//para conseguir ver varias linhas no serial plotter
-    Serial.println(bpm_calc);//ver calculo dos BPM
+    //Serial.println(bpm_calc);//ver calculo dos BPM
   }
 }
 
