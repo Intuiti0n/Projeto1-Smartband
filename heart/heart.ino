@@ -84,7 +84,7 @@ void setup() {
 void loop() {
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= 10) {//a cada 10 ms fazer 1 amostragem do adc
-    sensorValue = analogRead(A0);// It takes about 100 microseconds (0.0001 s) to read an analog input, so the maximum reading rate is about 10,000 times a second.
+    sensorValue = analogRead(A3);// It takes about 100 microseconds (0.0001 s) to read an analog input, so the maximum reading rate is about 10,000 times a second.
     previousMillis = currentMillis;
     signed long long int result = filterloop();//resultado do filtro, o filtro esta sempre a correr com os dados que vao chegando
     detect_bpm(result);

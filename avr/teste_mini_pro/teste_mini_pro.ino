@@ -8,6 +8,7 @@ void setup() {
 
 void loop() {
   digitalWrite(PIN, HIGH);
+  digitalWrite(13,HIGH);
   int adc_value = analogRead(A3);
   Serial.println(adc_value);
   delay(500);
