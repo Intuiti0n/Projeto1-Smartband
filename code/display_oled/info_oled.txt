@@ -1,0 +1,20 @@
+0.91" IIC I2C Serial SPI OLED LCD Display 128x32 3.3V/5V AVR PIC STM32 Arduino
+Description:
+OLED display, no need backlight, self-illumination, the display performance is better than the traditional LCD display, also lower consumption.
+
+
+Driver IC: SSD1306
+Size: 0.91 inch OLED
+Resolution: 128 x 32
+IIC interface
+Display Color: White
+
+Pin Description:
+
+GND: Power Ground
+
+VCC: Power + (DC 3.3 ~5v)
+
+SCL: Clock Line
+
+SDA: Data Line
