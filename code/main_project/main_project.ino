@@ -189,11 +189,20 @@ void loop() {
       previousMillis = currentMillis;
       signed long long int result = filterloop();//resultado do filtro, o filtro esta sempre a correr com os dados que vao chegando
       detect_bpm(result);
-
+/*
       //Serial.println(sensorValue);//valor lido diretamente do hardware
       Serial.println((double)result);//valor de saida do filtro digital
       //Serial.print(" ");//para conseguir ver varias linhas no serial plotter
       //Serial.println(bpm_calc);//ver calculo dos BPM
+*/
+      //to work with the android graph app
+  Serial.print("E");
+  Serial.print(sensorValue);
+  Serial.print(",");
+  Serial.print((double)result);
+  Serial.print(",");
+  Serial.print(bpm_calc);//ver calculo dos BPM
+  Serial.print("\n");
     }
   }
   else {
