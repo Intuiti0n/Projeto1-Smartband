@@ -243,25 +243,26 @@ void loop() {
       //Serial.print(",");//para conseguir ver varias linhas no serial plotter
       Serial.print(bpm_calc);//ver calculo dos BPM
       Serial.print("\n");
-    display.setTextSize(2);
-    display.setTextColor(WHITE);
-    display.setCursor(0, 0);
-    display.print("MODE:");
-    display.print(switch_pin_val);
-    display.setCursor(0, 16);
-    display.print("BPM:");
-    display.print(bpm_calc);
-    display.display();
+      display.setTextSize(2);
+      display.setTextColor(WHITE);
+      display.setCursor(0, 0);
+      display.print("MODE:");
+      display.print(switch_pin_val);
+      display.setCursor(0, 16);
+      display.print("BPM:");
+      display.print(bpm_calc);
+      display.display();
     }
   }
   else {
     Wire.beginTransmission(MPU_addr);
     Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
     Wire.endTransmission(false);//VER ISTO
-    Wire.requestFrom(MPU_addr, 3, true); // request a total of 14 registers -> VER ISTO
+    Wire.requestFrom(MPU_addr, 8, true); // request a total of 14 registers -> 2 * 8 bit registers
     AcX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
     AcY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
     AcZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+    Tmp = Wire.read() << 8 | Wire.read(); // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
     //counterY();// CHAMAR A ROTINA DE CONTAR OS PASSOS
     //counterX();// CHAMAR A ROTINA DE CONTAR OS PASSOS
     //counterZ();// CHAMAR A ROTINA DE CONTAR OS PASSOS
@@ -277,6 +278,8 @@ void loop() {
     //to work with the android graph app
     Serial.print("E");
     Serial.print(AcX);
+    Serial.print(",");
+    Serial.print(float(Tmp) / 340 + 36.53); //equation for temperature in degrees C from datasheet
     //Serial.print(",");
     //Serial.print(Tmp);
     /*
@@ -286,6 +289,16 @@ void loop() {
       Serial.print(AcZ);
     */
     Serial.print("\n");
-    delay(50);//ANALIZAR ESTE DELAY PARA ENTENDER A SUA EXISTENCIA
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.print("MODE:");
+    display.print(switch_pin_val);
+    display.setCursor(0, 16);
+    display.print("Temp:");
+    display.print(float(Tmp) / 340 + 36.53);
+    display.display();
+    delay(500);//ANALIZAR ESTE DELAY PARA ENTENDER A SUA EXISTENCIA
   }
 }
