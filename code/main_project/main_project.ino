@@ -1,43 +1,43 @@
 /* PROJETO 1 SMART BAND, EEIC, 4ANO,
   SENSOR DE PULSAÇAO, ENVIAR POR PORTA SERIE
-    AMOSTRAGEM 10 MS COM FILTRO (Fa=100Hz)
-    FILTRO BUTTERWORTH 2A ORDEM, FC=0,5Hz E FC=10Hz
+  AMOSTRAGEM 10 MS COM FILTRO (Fa=100Hz)
+  FILTRO BUTTERWORTH 2A ORDEM, FC=0,5Hz E FC=10Hz
 */
 
 /*  PINOS UTILIZADOS para a pulsaçao:
-     A3 -> SINAL DO SENSOR, SAIDA DO AMP OP
-     GND -> LIGAR A REFERENCIA DE TODO O CIRCUITO
+  A3 -> SINAL DO SENSOR, SAIDA DO AMP OP
+  GND -> LIGAR A REFERENCIA DE TODO O CIRCUITO
 
-   CONTADOR DE PASSOS
-   MPU 6050 -> ACELEROMETRO GIROSCOPIO 3 EIXOS
-   ENVIAR POR BLUETOOTH
-   PINOS DO MPU:
-   VCC -> 5V
-   GND -> GND
-   SCL -> A5
-   SDA -> A4
-   INT -> D2
+  CONTADOR DE PASSOS
+  MPU 6050 -> ACELEROMETRO GIROSCOPIO 3 EIXOS
+  ENVIAR POR BLUETOOTH
+  PINOS DO MPU:
+  VCC -> 5V
+  GND -> GND
+  SCL -> A5
+  SDA -> A4
+  INT -> D2
 
-   PINOS DO BLUETOOTH:
-   STATE -> D4
-   RX -> ARDUINO TX MAS COM DIVISOR DE TENSAO 3.3V
-   TX -> ARDUINO RX
-   GND -> GND
-   VCC -> 5V (AGUENTA 3.3 A 6v)
+  PINOS DO BLUETOOTH:
+  STATE -> D4
+  RX -> ARDUINO TX MAS COM DIVISOR DE TENSAO 3.3V
+  TX -> ARDUINO RX
+  GND -> GND
+  VCC -> 5V (AGUENTA 3.3 A 6v)
 
-   PINOS DO ECRA:
-   VCC -> 3.3V
-   GND->  GND
-   SCL->  A5
-   SDA->  A4
+  PINOS DO ECRA:
+  VCC -> 3.3V
+  GND->  GND
+  SCL->  A5
+  SDA->  A4
 
-   ----------------------------------------------------------------
-   -OS PINOS QUE NAO ESTAO INDICADOS DEVEM SER DEIXADOS DESLIGADOS-
-   ----------------------------------------------------------------
-   PASSWORD DO BLUETOOTH: 1234
-   BAUD RATE BLUETOOTH: 115200 (foi alterado usando comandos AT, por defeito é 9600)
+  ----------------------------------------------------------------
+  -OS PINOS QUE NAO ESTAO INDICADOS DEVEM SER DEIXADOS DESLIGADOS-
+  ----------------------------------------------------------------
+  PASSWORD DO BLUETOOTH: 1234
+  BAUD RATE BLUETOOTH: 115200 (foi alterado usando comandos AT, por defeito é 9600)
 */
-#include<Wire.h>
+#include <Wire.h>
 #include <SoftwareSerial.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -71,6 +71,42 @@ const byte BTpin = 4;
 // Connect the HC-05 RX to Arduino pin 3 TX through a voltage divider(if its a 5V arduino).
 char c = ' ';
 static bool switch_pin_val;
+/*-------------------------------------------------------------------------OLED------------------------------------------------------------------------*/
+
+#define OLED_RESET 4
+Adafruit_SSD1306 display(OLED_RESET);
+
+#define NUMFLAKES 10
+#define XPOS 0
+#define YPOS 1
+#define DELTAY 2
+
+
+#define LOGO16_GLCD_HEIGHT 16
+#define LOGO16_GLCD_WIDTH  16
+static const unsigned char PROGMEM logo16_glcd_bmp[] =
+{ B00000000, B11000000,
+  B00000001, B11000000,
+  B00000001, B11000000,
+  B00000011, B11100000,
+  B11110011, B11100000,
+  B11111110, B11111000,
+  B01111110, B11111111,
+  B00110011, B10011111,
+  B00011111, B11111100,
+  B00001101, B01110000,
+  B00011011, B10100000,
+  B00111111, B11100000,
+  B00111111, B11110000,
+  B01111100, B11110000,
+  B01110000, B01110000,
+  B00000000, B00110000
+};
+
+//testar se estamos a utilizar o ecra correto
+#if (SSD1306_LCDHEIGHT != 32)
+#error("Height incorrect, please fix Adafruit_SSD1306.h!");
+#endif
 
 /*-------------------------------------------------------------------------FILTRO------------------------------------------------------------------------*/
 //funcao do filtro digital implementado
@@ -154,6 +190,17 @@ void counterZ()
 void setup() {
   Serial.begin(115200);//velocidade da porta serie
   pinMode(PIN_MODE, INPUT); //definir pino do switch como input
+
+  // DISPLAY
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
+  // init done
+  // internally, this will display the Adafruitsplashscreen.
+  display.display();
+  delay(2000);
+  // Clear the buffer.
+  display.clearDisplay();
+
+
   switch_pin_val = digitalRead(PIN_MODE);
   if (switch_pin_val) {
     Wire.begin();
@@ -163,17 +210,17 @@ void setup() {
     Wire.endTransmission(true);
   }
   /*//test if the bluetooth is really connected
-      Serial.println("Arduino is ready");
-      Serial.println("Connect the HC-05 to an Android device to continue");
-        // wait until the HC-05 has made a connection
-        while (!BTconnected)
-        {
-          if ( digitalRead(BTpin)==HIGH)  { BTconnected = true;};
-        }
+    Serial.println("Arduino is ready");
+    Serial.println("Connect the HC-05 to an Android device to continue");
+    // wait until the HC-05 has made a connection
+    while (!BTconnected)
+    {
+    if ( digitalRead(BTpin)==HIGH)  { BTconnected = true;};
+    }
 
-        Serial.println("HC-05 is now connected");
-        Serial.println("");
-      //BTserial.begin(115200);
+    Serial.println("HC-05 is now connected");
+    Serial.println("");
+    //BTserial.begin(115200);
   */
 }
 
@@ -181,43 +228,43 @@ void setup() {
 void loop() {
   //se for modo 0, ler pulsaçao, senao ler passos
   if (!switch_pin_val) {
+    display.clearDisplay();
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= 10) {//a cada 10 ms fazer 1 amostragem do adc
       sensorValue = analogRead(A3);// It takes about 100 microseconds (0.0001 s) to read an analog input, so the maximum reading rate is about 10,000 times a second.
       previousMillis = currentMillis;
       signed long long int result = filterloop();//resultado do filtro, o filtro esta sempre a correr com os dados que vao chegando
       detect_bpm(result);
-      /*
-            //Serial.println(sensorValue);//valor lido diretamente do hardware
-            Serial.println((double)result);//valor de saida do filtro digital
-            //Serial.print(" ");//para conseguir ver varias linhas no serial plotter
-            //Serial.println(bpm_calc);//ver calculo dos BPM
-      */
       //to work with the android graph app
       Serial.print("E");
-      Serial.print(sensorValue);
-      Serial.print(",");
-      Serial.print((double)result);
-      Serial.print(",");
+      //Serial.print(sensorValue);//valor lido diretamente do hardware
+      //Serial.print(",");//para conseguir ver varias linhas no serial plotter
+      //Serial.print((double)result);//valor de saida do filtro digital
+      //Serial.print(",");//para conseguir ver varias linhas no serial plotter
       Serial.print(bpm_calc);//ver calculo dos BPM
       Serial.print("\n");
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.print("MODE:");
+    display.print(switch_pin_val);
+    display.setCursor(0, 16);
+    display.print("BPM:");
+    display.print(bpm_calc);
+    display.display();
     }
   }
   else {
     Wire.beginTransmission(MPU_addr);
     Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
     Wire.endTransmission(false);//VER ISTO
-    Wire.requestFrom(MPU_addr, 7, true); // request a total of 14 registers -> VER ISTO
+    Wire.requestFrom(MPU_addr, 3, true); // request a total of 14 registers -> VER ISTO
     AcX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
     AcY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
     AcZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-    Tmp = Wire.read() << 8 | Wire.read(); // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
-    GyX = Wire.read() << 8 | Wire.read(); // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
-    GyY = Wire.read() << 8 | Wire.read(); // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
-    GyZ = Wire.read() << 8 | Wire.read(); // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
-    counterY();// CHAMAR A ROTINA DE CONTAR OS PASSOS
-    counterX();// CHAMAR A ROTINA DE CONTAR OS PASSOS
-    counterZ();// CHAMAR A ROTINA DE CONTAR OS PASSOS
+    //counterY();// CHAMAR A ROTINA DE CONTAR OS PASSOS
+    //counterX();// CHAMAR A ROTINA DE CONTAR OS PASSOS
+    //counterZ();// CHAMAR A ROTINA DE CONTAR OS PASSOS
     //ENVIAR POR BLUETOOTH OS DADOS
     //Serial.print(" | AcY = "); Serial.println(AcY);
     //Serial.print(" | AcX = "); Serial.println(AcX);
@@ -230,8 +277,8 @@ void loop() {
     //to work with the android graph app
     Serial.print("E");
     Serial.print(AcX);
-    Serial.print(",");
-    Serial.print(Tmp);
+    //Serial.print(",");
+    //Serial.print(Tmp);
     /*
       Serial.print(",");
       Serial.print(AcY);
