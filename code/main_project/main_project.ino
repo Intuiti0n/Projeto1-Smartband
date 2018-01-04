@@ -7,7 +7,7 @@
 /*  PINOS UTILIZADOS para a pulsaçao:
      A3 -> SINAL DO SENSOR, SAIDA DO AMP OP
      GND -> LIGAR A REFERENCIA DE TODO O CIRCUITO
-   
+
    CONTADOR DE PASSOS
    MPU 6050 -> ACELEROMETRO GIROSCOPIO 3 EIXOS
    ENVIAR POR BLUETOOTH
@@ -25,13 +25,23 @@
    GND -> GND
    VCC -> 5V (AGUENTA 3.3 A 6v)
 
-   OS PINOS QUE NAO ESTAO INDICADOS DEVEM SER DEIXADOS DESLIGADOS
+   PINOS DO ECRA:
+   VCC -> 3.3V
+   GND->  GND
+   SCL->  A5
+   SDA->  A4
 
+   ----------------------------------------------------------------
+   -OS PINOS QUE NAO ESTAO INDICADOS DEVEM SER DEIXADOS DESLIGADOS-
+   ----------------------------------------------------------------
    PASSWORD DO BLUETOOTH: 1234
-   BAUD RATE BLUETOOTH: 115200
+   BAUD RATE BLUETOOTH: 115200 (foi alterado usando comandos AT, por defeito é 9600)
 */
 #include<Wire.h>
 #include <SoftwareSerial.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
 
 //filtro
 #define NZEROS 4
@@ -61,21 +71,9 @@ const byte BTpin = 4;
 // Connect the HC-05 RX to Arduino pin 3 TX through a voltage divider(if its a 5V arduino).
 char c = ' ';
 static bool switch_pin_val;
-//funcao do filtro digital implementado
-/*
-  static signed long long int filterloop()
-  {
-  xv[0] = xv[1]; xv[1] = xv[2]; xv[2] = xv[3]; xv[3] = xv[4];
-  xv[4] = (float)sensorValue / (float) GAIN;
-  yv[0] = yv[1]; yv[1] = yv[2]; yv[2] = yv[3]; yv[3] = yv[4];
-  yv[4] = (xv[0] + xv[4]) - 2 * xv[2] + (-0.4311751778 * yv[0]) + (2.0252665529 * yv[1]) + (-3.7457226060 * yv[2]) + (3.1513614870 * yv[3]);
-  outputValue = (long int) yv[4];
-  return outputValue;
-  }
-*/
 
 /*-------------------------------------------------------------------------FILTRO------------------------------------------------------------------------*/
-
+//funcao do filtro digital implementado
 signed long long int filterloop()
 {
   xv[0] = xv[1]; xv[1] = xv[2]; xv[2] = xv[3]; xv[3] = xv[4];
@@ -157,25 +155,25 @@ void setup() {
   Serial.begin(115200);//velocidade da porta serie
   pinMode(PIN_MODE, INPUT); //definir pino do switch como input
   switch_pin_val = digitalRead(PIN_MODE);
-  if(switch_pin_val){
+  if (switch_pin_val) {
     Wire.begin();
     Wire.beginTransmission(MPU_addr);
     Wire.write(0x6B);  // PWR_MGMT_1 register
     Wire.write(0);     // set to zero (wakes up the MPU-6050)
     Wire.endTransmission(true);
-}
-/*//test if the bluetooth is really connected
-    Serial.println("Arduino is ready");
-    Serial.println("Connect the HC-05 to an Android device to continue");
-      // wait until the HC-05 has made a connection
-      while (!BTconnected)
-      {
-        if ( digitalRead(BTpin)==HIGH)  { BTconnected = true;};
-      }
+  }
+  /*//test if the bluetooth is really connected
+      Serial.println("Arduino is ready");
+      Serial.println("Connect the HC-05 to an Android device to continue");
+        // wait until the HC-05 has made a connection
+        while (!BTconnected)
+        {
+          if ( digitalRead(BTpin)==HIGH)  { BTconnected = true;};
+        }
 
-      Serial.println("HC-05 is now connected");
-      Serial.println("");
-    //BTserial.begin(115200);
+        Serial.println("HC-05 is now connected");
+        Serial.println("");
+      //BTserial.begin(115200);
   */
 }
 
@@ -189,58 +187,58 @@ void loop() {
       previousMillis = currentMillis;
       signed long long int result = filterloop();//resultado do filtro, o filtro esta sempre a correr com os dados que vao chegando
       detect_bpm(result);
-/*
-      //Serial.println(sensorValue);//valor lido diretamente do hardware
-      Serial.println((double)result);//valor de saida do filtro digital
-      //Serial.print(" ");//para conseguir ver varias linhas no serial plotter
-      //Serial.println(bpm_calc);//ver calculo dos BPM
-*/
+      /*
+            //Serial.println(sensorValue);//valor lido diretamente do hardware
+            Serial.println((double)result);//valor de saida do filtro digital
+            //Serial.print(" ");//para conseguir ver varias linhas no serial plotter
+            //Serial.println(bpm_calc);//ver calculo dos BPM
+      */
       //to work with the android graph app
-  Serial.print("E");
-  Serial.print(sensorValue);
-  Serial.print(",");
-  Serial.print((double)result);
-  Serial.print(",");
-  Serial.print(bpm_calc);//ver calculo dos BPM
-  Serial.print("\n");
+      Serial.print("E");
+      Serial.print(sensorValue);
+      Serial.print(",");
+      Serial.print((double)result);
+      Serial.print(",");
+      Serial.print(bpm_calc);//ver calculo dos BPM
+      Serial.print("\n");
     }
   }
   else {
-     Wire.beginTransmission(MPU_addr);
-  Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
-  Wire.endTransmission(false);//VER ISTO
-  Wire.requestFrom(MPU_addr, 7, true); // request a total of 14 registers -> VER ISTO
-  AcX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
-  AcY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
-  AcZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-  Tmp = Wire.read() << 8 | Wire.read(); // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
-  GyX = Wire.read() << 8 | Wire.read(); // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
-  GyY = Wire.read() << 8 | Wire.read(); // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
-  GyZ = Wire.read() << 8 | Wire.read(); // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
-  counterY();// CHAMAR A ROTINA DE CONTAR OS PASSOS
-  counterX();// CHAMAR A ROTINA DE CONTAR OS PASSOS
-  counterZ();// CHAMAR A ROTINA DE CONTAR OS PASSOS
-  //ENVIAR POR BLUETOOTH OS DADOS
-  //Serial.print(" | AcY = "); Serial.println(AcY);
-  //Serial.print(" | AcX = "); Serial.println(AcX);
-  //Serial.print(" | AcZ = "); Serial.println(AcZ);
-  /*
-    Serial.print(" | CounterY = "); Serial.println(counter1);
-    Serial.print(" | CounterX = "); Serial.println(counter2);
-    Serial.print(" | CounterZ = "); Serial.println(counter3);*/
+    Wire.beginTransmission(MPU_addr);
+    Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
+    Wire.endTransmission(false);//VER ISTO
+    Wire.requestFrom(MPU_addr, 7, true); // request a total of 14 registers -> VER ISTO
+    AcX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
+    AcY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
+    AcZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+    Tmp = Wire.read() << 8 | Wire.read(); // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
+    GyX = Wire.read() << 8 | Wire.read(); // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
+    GyY = Wire.read() << 8 | Wire.read(); // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
+    GyZ = Wire.read() << 8 | Wire.read(); // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
+    counterY();// CHAMAR A ROTINA DE CONTAR OS PASSOS
+    counterX();// CHAMAR A ROTINA DE CONTAR OS PASSOS
+    counterZ();// CHAMAR A ROTINA DE CONTAR OS PASSOS
+    //ENVIAR POR BLUETOOTH OS DADOS
+    //Serial.print(" | AcY = "); Serial.println(AcY);
+    //Serial.print(" | AcX = "); Serial.println(AcX);
+    //Serial.print(" | AcZ = "); Serial.println(AcZ);
+    /*
+      Serial.print(" | CounterY = "); Serial.println(counter1);
+      Serial.print(" | CounterX = "); Serial.println(counter2);
+      Serial.print(" | CounterZ = "); Serial.println(counter3);*/
 
-  //to work with the android graph app
-  Serial.print("E");
-  Serial.print(AcX);
-  Serial.print(",");
-  Serial.print(Tmp);
-  /*
-  Serial.print(",");
-  Serial.print(AcY);
-  Serial.print(",");
-  Serial.print(AcZ);
-  */
-  Serial.print("\n");
-  delay(50);//ANALIZAR ESTE DELAY PARA ENTENDER A SUA EXISTENCIA
+    //to work with the android graph app
+    Serial.print("E");
+    Serial.print(AcX);
+    Serial.print(",");
+    Serial.print(Tmp);
+    /*
+      Serial.print(",");
+      Serial.print(AcY);
+      Serial.print(",");
+      Serial.print(AcZ);
+    */
+    Serial.print("\n");
+    delay(50);//ANALIZAR ESTE DELAY PARA ENTENDER A SUA EXISTENCIA
   }
 }
