@@ -183,8 +183,8 @@ void loop() {
     steps(filtro);
 
     Serial.print("E");
-    //Serial.print(filtro);
-    //Serial.print(",");
+    Serial.print((int) filtro);
+    Serial.print(",");
     Serial.println(step_counter);
   }
 }
