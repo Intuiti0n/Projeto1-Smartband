@@ -162,7 +162,7 @@ static float filterloop(float in) {
 }
 
 void loop() {
-  static float teste;
+  //static float teste;
   int8_t trash = 0;
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= 10) {

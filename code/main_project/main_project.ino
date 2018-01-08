@@ -38,7 +38,6 @@
   BAUD RATE BLUETOOTH: 115200 (foi alterado usando comandos AT, por defeito é 9600)
 */
 #include <Wire.h>
-//#include <SoftwareSerial.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -53,12 +52,14 @@ static volatile unsigned long sensorValue = 0;        // will store ADC value fr
 static volatile signed long long int outputValue = 0;
 //para a zona dos tempos, alterar para colocar por interrupção?
 unsigned long previousMillis = 0;        // will store last time LED was updated
+unsigned long tempo_anterior = 0;        // will store last time LED was updated
 //unsigned long tempo_anterior = 0;        // will store last time LED was updated
 static volatile int bpm = 0;//numero de batimentos detetados por rising edge do filtro
 static volatile long int bpm_calc = 0;//calculo dos batimentos por minuto
 //int flag_mode;
 
 //pulsaçao+bluetooth:
+#define STEP_THRESHOLD 400
 const int MPU_addr = 0x68; // I2C address of the MPU-6050
 volatile int16_t AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
 static volatile int counter1 = 0, last = 0, counter2 = 0, counter3 = 0;
@@ -71,6 +72,7 @@ const byte BTpin = 4;
 // Connect the HC-05 RX to Arduino pin 3 TX through a voltage divider(if its a 5V arduino).
 //char c = ' ';
 static bool switch_pin_val;
+static long int step_counter = 0;
 /*-------------------------------------------------------------------------OLED------------------------------------------------------------------------*/
 
 #define OLED_RESET 4
@@ -152,15 +154,35 @@ void detect_bpm(long long int resultado) {
 /*-------------------------------------------------------------------------PASSOS------------------------------------------------------------------------*/
 
 //ROTINA DE CONTAGEM DOS PASSOS, MELHORAR ISTO PARA DETETAR MELHOR
-void counterY()
-{
-  static bool flag = false;
-  if (AcY >= -12000) flag = true;
-  if (flag && AcY < -13000)
-  {
-    flag = false;
-    counter1 += 1;
+
+void steps(int value) {
+  static char flag = 0;
+  if (value > STEP_THRESHOLD && flag == 0) {
+    flag = 1;
+    step_counter++;
   }
+
+  if (flag == 1 && value < 0) {
+    flag = 0;
+  }
+}
+
+#define STEP_NZEROS 4
+#define STEP_NPOLES 4
+#define STEP_GAIN   5.950605930e+01
+
+static float STEP_xv[STEP_NZEROS + 1], STEP_yv[STEP_NPOLES + 1];
+
+static float STEP_filterloop(float in) {
+  static float out = 0;
+  STEP_xv[0] = STEP_xv[1]; STEP_xv[1] = STEP_xv[2]; STEP_xv[2] = STEP_xv[3]; STEP_xv[3] = STEP_xv[4];
+  STEP_xv[4] = in / STEP_GAIN;
+  STEP_yv[0] = STEP_yv[1]; STEP_yv[1] = STEP_yv[2]; STEP_yv[2] = STEP_yv[3]; STEP_yv[3] = STEP_yv[4];
+  STEP_yv[4] =   (STEP_xv[0] + STEP_xv[4]) - 2 * STEP_xv[2]
+                 + ( -0.6704579059 * STEP_yv[0]) + (  2.9304272168 * STEP_yv[1])
+                 + ( -4.8462898043 * STEP_yv[2]) + (  3.5862398081 * STEP_yv[3]);
+  out = STEP_yv[4];
+  return out;
 }
 /*-------------------------------------------------------------------------setup e main loop-------------------------------------------------------------*/
 
@@ -181,25 +203,28 @@ void setup() {
 
   switch_pin_val = digitalRead(PIN_MODE);
   if (switch_pin_val) {
+    Wire.setClock(100000);
     Wire.begin();
     Wire.beginTransmission(MPU_addr);
     Wire.write(0x6B);  // PWR_MGMT_1 register
     Wire.write(0);     // set to zero (wakes up the MPU-6050)
     Wire.endTransmission(true);
   }
-  /*//test if the bluetooth is really connected
-    Serial.println("Arduino is ready");
-    Serial.println("Connect the HC-05 to an Android device to continue");
-    // wait until the HC-05 has made a connection
-    while (!BTconnected)
-    {
-    if ( digitalRead(BTpin)==HIGH)  { BTconnected = true;};
-    }
+  //test if the bluetooth is really connected
+  //Serial.println("Arduino is ready");
+  //Serial.println("Connect the HC-05 to an Android device to continue");
+  // wait until the HC-05 has made a connection
+  while (!BTconnected)
+  {
+    if ( digitalRead(BTpin) == HIGH)  {
+      BTconnected = true;
+    };
+  }
 
-    Serial.println("HC-05 is now connected");
-    Serial.println("");
-    //BTserial.begin(115200);
-  */
+  //Serial.println("HC-05 is now connected");
+  //Serial.println("");
+  //BTserial.begin(115200);
+
 }
 
 //main loop
@@ -233,50 +258,41 @@ void loop() {
     }
   }
   else {
-    Wire.beginTransmission(MPU_addr);
-    Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
-    Wire.endTransmission(false);//VER ISTO
-    Wire.requestFrom(MPU_addr, 8, true); // request a total of 14 registers -> 2 * 8 bit registers
-    AcX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
-    AcY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
-    AcZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-    Tmp = Wire.read() << 8 | Wire.read(); // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
-    //counterY();// CHAMAR A ROTINA DE CONTAR OS PASSOS
-    //counterX();// CHAMAR A ROTINA DE CONTAR OS PASSOS
-    //counterZ();// CHAMAR A ROTINA DE CONTAR OS PASSOS
-    //ENVIAR POR BLUETOOTH OS DADOS
-    //Serial.print(" | AcY = "); Serial.println(AcY);
-    //Serial.print(" | AcX = "); Serial.println(AcX);
-    //Serial.print(" | AcZ = "); Serial.println(AcZ);
-    /*
-      Serial.print(" | CounterY = "); Serial.println(counter1);
-      Serial.print(" | CounterX = "); Serial.println(counter2);
-      Serial.print(" | CounterZ = "); Serial.println(counter3);*/
+    int8_t trash = 0;
+    unsigned long tempo_atual = millis();
+    if (tempo_atual - tempo_anterior >= 10) {
+      tempo_anterior = tempo_atual;
+      Wire.beginTransmission(MPU_addr);
+      Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
+      Wire.endTransmission(false);//VER ISTO
+      Wire.requestFrom(MPU_addr, 5, true); // request a total of 14 registers -> 2 * 8 bit registers
+      AcX = Wire.read();// 0x3B (ACCEL_XOUT_H)
+      trash = Wire.read(); // & 0x3C (ACCEL_XOUT_L)
+      AcY = Wire.read() ; // 0x3D (ACCEL_YOUT_H)
+      trash = Wire.read(); //0x3E (ACCEL_YOUT_L)
+      AcZ = Wire.read() ; // 0x3F (ACCEL_ZOUT_H)
 
-    //to work with the android graph app
-    Serial.print("E");
-    Serial.print(AcX);
-    Serial.print(",");
-    Serial.print(float(Tmp) / 340 + 36.53); //equation for temperature in degrees C from datasheet
-    //Serial.print(",");
-    //Serial.print(Tmp);
-    /*
+      float filtro = STEP_filterloop(AcY * AcZ);
+      steps(filtro);
+
+      Serial.print("E");
+      Serial.print((int) filtro);
       Serial.print(",");
-      Serial.print(AcY);
-      Serial.print(",");
-      Serial.print(AcZ);
-    */
-    Serial.print("\n");
-    display.clearDisplay();
-    display.setTextSize(2);
-    display.setTextColor(WHITE);
-    display.setCursor(0, 0);
-    display.print("MODE:");
-    display.print(switch_pin_val);
-    display.setCursor(0, 16);
-    display.print("Temp:");
-    display.print(float(Tmp) / 340 + 36.53);
-    display.display();
-    delay(500);//ANALIZAR ESTE DELAY PARA ENTENDER A SUA EXISTENCIA
+      Serial.println(step_counter);
+
+      display.clearDisplay();
+      display.setTextSize(2);
+      display.setTextColor(WHITE);
+      display.setCursor(0, 0);
+      display.print("MODE:");
+      display.print(switch_pin_val);
+      display.setCursor(0, 16);
+      //display.print("Temp:");
+      //display.print(float(Tmp) / 340 + 36.53);
+      display.print("STEP:");
+      display.print(step_counter);
+
+      display.display();
+    }
   }
 }
