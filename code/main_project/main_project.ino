@@ -38,7 +38,7 @@
   BAUD RATE BLUETOOTH: 115200 (foi alterado usando comandos AT, por defeito é 9600)
 */
 #include <Wire.h>
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -56,7 +56,7 @@ unsigned long previousMillis = 0;        // will store last time LED was updated
 //unsigned long tempo_anterior = 0;        // will store last time LED was updated
 static volatile int bpm = 0;//numero de batimentos detetados por rising edge do filtro
 static volatile long int bpm_calc = 0;//calculo dos batimentos por minuto
-int flag_mode;
+//int flag_mode;
 
 //pulsaçao+bluetooth:
 const int MPU_addr = 0x68; // I2C address of the MPU-6050
@@ -69,7 +69,7 @@ const byte BTpin = 4;
 //SoftwareSerial BTserial(0, 1); // RX | TX
 // Connect the HC-05 TX to Arduino pin 2 RX.
 // Connect the HC-05 RX to Arduino pin 3 TX through a voltage divider(if its a 5V arduino).
-char c = ' ';
+//char c = ' ';
 static bool switch_pin_val;
 /*-------------------------------------------------------------------------OLED------------------------------------------------------------------------*/
 
@@ -160,28 +160,6 @@ void counterY()
   {
     flag = false;
     counter1 += 1;
-  }
-}
-
-void counterX()
-{
-  static bool flag = false;
-  if (AcY >= -15000) flag = true;
-  if (flag && AcY < -16000)
-  {
-    flag = false;
-    counter2 += 1;
-  }
-}
-
-void counterZ()
-{
-  static bool flag = false;
-  if (AcY >= -15000) flag = true;
-  if (flag && AcY < -16000)
-  {
-    flag = false;
-    counter3 += 1;
   }
 }
 /*-------------------------------------------------------------------------setup e main loop-------------------------------------------------------------*/
