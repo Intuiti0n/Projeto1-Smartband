@@ -1,3 +1,4 @@
+//codigo usado pra testar todos os pinos do ARDUINO MINI PRO
 #define PIN 12
 #define adc A6
 void setup() {
