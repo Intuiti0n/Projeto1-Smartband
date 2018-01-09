@@ -118,22 +118,27 @@ signed long long int filterloop()
 
 //calculo do tempo medio do batimento, de forma a estimar com mais precisão os batimentos por minuto
 int calcular_media(long int vec[]) {
-  float batimentos = (vec[4] - vec[3]) + (vec[3] - vec[2]) + (vec[2] - vec[1]) + (vec[1] - vec[0]);
+  long int batimentos = abs(vec[4] - vec[3]) + abs(vec[3] - vec[2]) + abs(vec[2] - vec[1]) + abs(vec[1] - vec[0]);
+  for(int i=0;i<5;i++){
+    Serial.println(abs(vec[i]));
+  }
   batimentos = batimentos / 4000; ///4 porque é a media de 4 pulsos e esta em milisegundos (1000) explica o pq de /(4*1000)
+   Serial.print(batimentos*60);
+   Serial.print("\n\n");
   return (int)(batimentos * 60);
 }
 
 //algoritmo de deteção de bpm, baseia-se na deteçao do rising edge do sinal filtrado, ao passar por zero, conta 1 batimento
 void detect_bpm(long long int resultado) {
-  unsigned long long int tempo = millis(), tempo1 = 0, tempo2 = 0;
-  static long long int last_value = 0;
+  unsigned long int tempo = millis(), tempo1 = 0, tempo2 = 0;
+  static long int last_value = 0;
   static char flag = 0;
   static long int vec[5] = {0};
   static int i = 0;
 
   if (resultado == 0 || (resultado >= 0 && last_value < 0)) {//Se detetar rising edge ou a passar pelo zero, incrementa batimentos
-    bpm = bpm + 1;
-    vec[i++] = tempo;
+        bpm = bpm + 1;
+        vec[i++] = tempo;
   }
   if (i == 5) {// a cada 5 batimentos estima o periodo, calcula os bpms aproximados
     bpm_calc = calcular_media(vec);
@@ -203,13 +208,14 @@ void setup() {
     Wire.write(0);     // set to zero (wakes up the MPU-6050)
     Wire.endTransmission(true);
   }
+  /*
   // wait until the HC-05 has made a connection
   while (!BTconnected)
   {
     if ( digitalRead(BTpin) == HIGH)  {
       BTconnected = true;
     };
-  }
+  }*/
 }
 
 //main loop
@@ -224,14 +230,17 @@ void loop() {
       previousMillis = currentMillis;
       signed long long int result = filterloop();//resultado do filtro, o filtro esta sempre a correr com os dados que vao chegando
       detect_bpm(result);
+      
       //to work with the android graph app
-      Serial.print("E");
+      //Serial.print("E");
       //Serial.print(sensorValue);//valor lido diretamente do hardware
       //Serial.print(",");//para conseguir ver varias linhas no serial plotter
       //Serial.print((double)result);//valor de saida do filtro digital
       //Serial.print(",");//para conseguir ver varias linhas no serial plotter
-      Serial.print(bpm_calc);//ver calculo dos BPM
-      Serial.print("\n");
+      //Serial.print(bpm_calc);//ver calculo dos BPM
+      //Serial.print("\n");
+
+      //DISPLAY
       display.setTextSize(2);
       display.setTextColor(WHITE);
       display.setCursor(0, 0);
@@ -278,7 +287,6 @@ void loop() {
       //display.print(float(Tmp) / 340 + 36.53);
       display.print("STEP:");
       display.print(step_counter);
-
       display.display();
     }
   }
