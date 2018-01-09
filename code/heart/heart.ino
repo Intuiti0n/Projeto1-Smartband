@@ -61,7 +61,12 @@ void detect_bpm(long long int resultado) {
   //rising edge detection
   if (resultado == 0 || (resultado >= 0 && last_value < 0)) {//Se detetar rising edge ou a passar pelo zero, incrementa batimentos
     bpm = bpm + 1;
-    vec[i++] = tempo;
+    long int period = tempo - vec[i - 1];
+    //comentar isto
+    Serial.println(period);//valor de saida do filtro digital
+    if (period > 200 && period < 1200) {
+      vec[i++] = tempo;
+    }
   }
   if (i == 5) {// a cada 5 batimentos estima o periodo, calcula os bpms aproximados
     bpm_calc = calcular_media(vec);
@@ -86,7 +91,7 @@ void loop() {
     detect_bpm(result);
 
     //Serial.println(sensorValue);//valor lido diretamente do hardware
-    Serial.println((double)result);//valor de saida do filtro digital
+    //Serial.println((double)result);//valor de saida do filtro digital
     //Serial.print(" ");//para conseguir ver varias linhas no serial plotter
     //Serial.println(bpm_calc);//ver calculo dos BPM
   }
