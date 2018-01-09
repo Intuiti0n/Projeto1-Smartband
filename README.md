@@ -45,3 +45,63 @@ Tiago Ferreira A71970<br>
   <figcaption>Fig2. - Implementação do sensor de passos.</figcaption>
 </figure>
   <br>
+  
+  <h3>Conceção, implementação e teste do sensor de batimento cardíaco. </h3>
+   <figure>
+  <img src="/images/prints_relatorio/ldr_signal.png" alt="ldr_signal">
+  <figcaption>Sinal do LDR</figcaption>
+</figure>
+
+<figure>
+  <img src="/images/prints_relatorio/passa_alto.png" alt="passa_alto">
+  <figcaption>passa_alto</figcaption>
+</figure>
+
+<figure>
+  <img src="/images/prints_relatorio/passa_alto_mais_1_passa_baixo.png" alt="passa_alto_mais_1_passa_baixo">
+  <figcaption>passa_alto_mais_1_passa_baixo</figcaption>
+</figure>
+
+<figure>
+  <img src="/images/prints_relatorio/passa_alto_mais_2_passa_baixo.png" alt="passa_alto_mais_2_passa_baixo">
+  <figcaption>passa_alto_mais_2_passa_baixo</figcaption>
+</figure>
+
+
+<figure>
+  <img src="/images/prints_relatorio/sinal_output_amplificado.png" alt="sinal_output_amplificado">
+  <figcaption>sinal_output_amplificado</figcaption>
+</figure>
+
+<figure>
+  <img src="/images/prints_relatorio/comparar_2_sinais_entrada_saida.png" alt="comparar_2_sinais_entrada_saida">
+  <figcaption>comparar_2_sinais_entrada_saida</figcaption>
+</figure>
+
+<h4>Diagramas de Bode dos filtros:</h4>
+<figure>
+  <img src="/images/prints_relatorio/Passa%20alto.PNG" alt="Passa alto">
+  <figcaption>Passa alto</figcaption>
+</figure>
+
+<figure>
+  <img src="/images/prints_relatorio/Passa%20baixo%201.PNG" alt="Passa baixo">
+  <figcaption>Passa baixo primeiro</figcaption>
+</figure>
+
+<figure>
+  <img src="/images/prints_relatorio/Passa%20baixo%202.PNG" alt="Passa baixo 2">
+  <figcaption>Passa baixo segundo</figcaption>
+</figure>
+
+<figure>
+  <img src="/images/prints_relatorio/Passa%20banda.PNG" alt="Passa banda">
+  <figcaption>Passa banda</figcaption>
+</figure>
+
+
+<h4>Sinal adquirido pela porta serie</h4>
+<figure>
+  <img src="/images/prints_relatorio/porta_serie.png" alt="porta_serie">
+  <figcaption>GRAFICO DA PORTA SERIE</figcaption>
+</figure>
