@@ -31,6 +31,12 @@ unsigned long previousMillis = 0;        // pulsaçao
 static volatile int bpm = 0;//numero de batimentos detetados por rising edge do filtro
 static volatile long int bpm_calc = 0;//calculo dos batimentos por minuto
 
+/*bluetooth--------------------------------------------------------------------*/
+// BTconnected will = false when not connected and true when connected
+boolean BTconnected = false;
+
+// connect the STATE pin to Arduino pin D4
+const byte BTpin = 4;
 
 /*-------------------------------------------------------------------------FILTRO HEART------------------------------------------------------------------------*/
 //funcao do filtro digital implementado para o sensor de bpm cardiacos
@@ -61,12 +67,7 @@ void detect_bpm(long long int resultado) {
   //rising edge detection
   if (resultado == 0 || (resultado >= 0 && last_value < 0)) {//Se detetar rising edge ou a passar pelo zero, incrementa batimentos
     bpm = bpm + 1;
-    long int period = tempo - vec[i - 1];
-    //comentar isto
-    Serial.println(period);//valor de saida do filtro digital
-    if (period > 200 && period < 1200) {
-      vec[i++] = tempo;
-    }
+    vec[i++] = tempo;
   }
   if (i == 5) {// a cada 5 batimentos estima o periodo, calcula os bpms aproximados
     bpm_calc = calcular_media(vec);
@@ -90,10 +91,14 @@ void loop() {
     signed long long int result = filterloop();//resultado do filtro, o filtro esta sempre a correr com os dados que vao chegando
     detect_bpm(result);
 
+    //Serial.print("E");
     //Serial.println(sensorValue);//valor lido diretamente do hardware
     //Serial.println((double)result);//valor de saida do filtro digital
     //Serial.print(" ");//para conseguir ver varias linhas no serial plotter
-    //Serial.println(bpm_calc);//ver calculo dos BPM
+    Serial.print("E");
+    Serial.println(bpm_calc);//ver calculo dos BPM
+    //Serial.print(",");
+    //Serial.println((double)result);//valor de saida do filtro digital
   }
 }
 
