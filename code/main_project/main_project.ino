@@ -41,38 +41,32 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-
-//filtro
+#define PIN_MODE 5 //pino do interruptor pra alternar entre modos
+#define PIN_HEART A3
+//filtro pulsaçao
 #define NZEROS 4
 #define NPOLES 4
 #define GAIN   1.587070257e+01
-#define PIN_MODE 5 //pino do interruptor pra alternar entre modos
 static float xv[NZEROS + 1], yv[NPOLES + 1];
 static volatile unsigned long sensorValue = 0;        // will store ADC value from sensor
 static volatile signed long long int outputValue = 0;
-//para a zona dos tempos, alterar para colocar por interrupção?
-unsigned long previousMillis = 0;        // will store last time LED was updated
-unsigned long tempo_anterior = 0;        // will store last time LED was updated
-//unsigned long tempo_anterior = 0;        // will store last time LED was updated
+unsigned long previousMillis = 0;        // pulsaçao
 static volatile int bpm = 0;//numero de batimentos detetados por rising edge do filtro
 static volatile long int bpm_calc = 0;//calculo dos batimentos por minuto
-//int flag_mode;
 
-//pulsaçao+bluetooth:
-#define STEP_THRESHOLD 400
+//steps
+unsigned long tempo_anterior = 0;        // passos
+#define STEP_THRESHOLD 400 //threshold do sensor de passos, do algoritmo basico
 const int MPU_addr = 0x68; // I2C address of the MPU-6050
 volatile int16_t AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
 static volatile int counter1 = 0, last = 0, counter2 = 0, counter3 = 0;
+static long int step_counter = 0;//count the steps
+
+//bluetooth
 // BTconnected will = false when not connected and true when connected
 boolean BTconnected = false;
-// connect the STATE pin to Arduino pin D4
-const byte BTpin = 4;
-//SoftwareSerial BTserial(0, 1); // RX | TX
-// Connect the HC-05 TX to Arduino pin 2 RX.
-// Connect the HC-05 RX to Arduino pin 3 TX through a voltage divider(if its a 5V arduino).
-//char c = ' ';
-static bool switch_pin_val;
-static long int step_counter = 0;
+const byte BTpin = 4;//pin to test the STATE of the bluetooth
+static bool switch_pin_val;//pin to change between steps and heart rate monitor
 /*-------------------------------------------------------------------------OLED------------------------------------------------------------------------*/
 
 #define OLED_RESET 4
@@ -110,8 +104,8 @@ static const unsigned char PROGMEM logo16_glcd_bmp[] =
 #error("Height incorrect, please fix Adafruit_SSD1306.h!");
 #endif
 
-/*-------------------------------------------------------------------------FILTRO------------------------------------------------------------------------*/
-//funcao do filtro digital implementado
+/*-------------------------------------------------------------------------FILTRO HEART------------------------------------------------------------------------*/
+//funcao do filtro digital implementado para o sensor de bpm cardiacos
 signed long long int filterloop()
 {
   xv[0] = xv[1]; xv[1] = xv[2]; xv[2] = xv[3]; xv[3] = xv[4];
@@ -150,11 +144,9 @@ void detect_bpm(long long int resultado) {
   }
   last_value = resultado;
 }
-
 /*-------------------------------------------------------------------------PASSOS------------------------------------------------------------------------*/
 
 //ROTINA DE CONTAGEM DOS PASSOS, MELHORAR ISTO PARA DETETAR MELHOR
-
 void steps(int value) {
   static char flag = 0;
   if (value > STEP_THRESHOLD && flag == 0) {
@@ -167,12 +159,14 @@ void steps(int value) {
   }
 }
 
+//valores para o filtro dos passos
 #define STEP_NZEROS 4
 #define STEP_NPOLES 4
 #define STEP_GAIN   5.950605930e+01
 
 static float STEP_xv[STEP_NZEROS + 1], STEP_yv[STEP_NPOLES + 1];
 
+//rotina do filtro de passos
 static float STEP_filterloop(float in) {
   static float out = 0;
   STEP_xv[0] = STEP_xv[1]; STEP_xv[1] = STEP_xv[2]; STEP_xv[2] = STEP_xv[3]; STEP_xv[3] = STEP_xv[4];
@@ -193,26 +187,22 @@ void setup() {
 
   // DISPLAY
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
-  // init done
   // internally, this will display the Adafruitsplashscreen.
-  display.display();
+  display.display();//use this after each change to the screen
   delay(2000);
   // Clear the buffer.
   display.clearDisplay();
 
-
-  switch_pin_val = digitalRead(PIN_MODE);
+  //se PIN = ON -> MODO STEPS, SE OFF, MODO PULSAÇAO
+  switch_pin_val = digitalRead(PIN_MODE);//ler pino do modo no inicio do programa
   if (switch_pin_val) {
-    Wire.setClock(100000);
+    Wire.setClock(100000);//I2C A 100kHz
     Wire.begin();
     Wire.beginTransmission(MPU_addr);
     Wire.write(0x6B);  // PWR_MGMT_1 register
     Wire.write(0);     // set to zero (wakes up the MPU-6050)
     Wire.endTransmission(true);
   }
-  //test if the bluetooth is really connected
-  //Serial.println("Arduino is ready");
-  //Serial.println("Connect the HC-05 to an Android device to continue");
   // wait until the HC-05 has made a connection
   while (!BTconnected)
   {
@@ -220,21 +210,17 @@ void setup() {
       BTconnected = true;
     };
   }
-
-  //Serial.println("HC-05 is now connected");
-  //Serial.println("");
-  //BTserial.begin(115200);
-
 }
 
 //main loop
 void loop() {
   //se for modo 0, ler pulsaçao, senao ler passos
+  //PULSACAO
   if (!switch_pin_val) {
     display.clearDisplay();
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= 10) {//a cada 10 ms fazer 1 amostragem do adc
-      sensorValue = analogRead(A3);// It takes about 100 microseconds (0.0001 s) to read an analog input, so the maximum reading rate is about 10,000 times a second.
+      sensorValue = analogRead(PIN_HEART);// It takes about 100 microseconds (0.0001 s) to read an analog input, so the maximum reading rate is about 10,000 times a second.
       previousMillis = currentMillis;
       signed long long int result = filterloop();//resultado do filtro, o filtro esta sempre a correr com os dados que vao chegando
       detect_bpm(result);
@@ -257,6 +243,7 @@ void loop() {
       display.display();
     }
   }
+  //STEPS
   else {
     int8_t trash = 0;
     unsigned long tempo_atual = millis();
