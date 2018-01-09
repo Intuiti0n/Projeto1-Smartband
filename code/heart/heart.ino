@@ -1,5 +1,5 @@
 /* PROJETO 1 SMART BAND
- *  SENSOR DE PULSAÇAO, ENVIAR POR PORTA SERIE
+    SENSOR DE PULSAÇAO, ENVIAR POR PORTA SERIE
     TESTE AMOSTRAGEM 10 MS COM FILTRO
     FILTRO BUTTERWORTH 2A ORDEM, FC=0,5Hz E FC=10Hz
     Digital filter designed by mkfilter/mkshape/gencode   A.J. Fisher
@@ -16,28 +16,25 @@
 */
 
 /*  PINOS UTILIZADOS DO ARDUINO:
- *   A0 -> SINAL DO SENSOR, SAIDA DO AMP OP
- *   GND -> LIGAR A REFERENCIA DE TODO O CIRCUITO
- */
- 
-//filtro
+     A0 -> SINAL DO SENSOR, SAIDA DO AMP OP
+     GND -> LIGAR A REFERENCIA DE TODO O CIRCUITO
+*/
+#define PIN_HEART A3
+//filtro pulsaçao
 #define NZEROS 4
 #define NPOLES 4
 #define GAIN   1.587070257e+01
 static float xv[NZEROS + 1], yv[NPOLES + 1];
 static volatile unsigned long sensorValue = 0;        // will store ADC value from sensor
 static volatile signed long long int outputValue = 0;
-
-//para a zona dos tempos, alterar para colocar por interrupção?
-unsigned long previousMillis = 0;        // will store last time LED was updated
-//unsigned long tempo_anterior = 0;        // will store last time LED was updated
-
-
+unsigned long previousMillis = 0;        // pulsaçao
 static volatile int bpm = 0;//numero de batimentos detetados por rising edge do filtro
 static volatile long int bpm_calc = 0;//calculo dos batimentos por minuto
 
-//funcao do filtro digital implementado
-static signed long long int filterloop()
+
+/*-------------------------------------------------------------------------FILTRO HEART------------------------------------------------------------------------*/
+//funcao do filtro digital implementado para o sensor de bpm cardiacos
+signed long long int filterloop()
 {
   xv[0] = xv[1]; xv[1] = xv[2]; xv[2] = xv[3]; xv[3] = xv[4];
   xv[4] = (float)sensorValue / (float) GAIN;
@@ -61,7 +58,7 @@ void detect_bpm(long long int resultado) {
   static char flag = 0;
   static long int vec[5] = {0};
   static int i = 0;
-  
+  //rising edge detection
   if (resultado == 0 || (resultado >= 0 && last_value < 0)) {//Se detetar rising edge ou a passar pelo zero, incrementa batimentos
     bpm = bpm + 1;
     vec[i++] = tempo;
@@ -76,7 +73,6 @@ void detect_bpm(long long int resultado) {
   last_value = resultado;
 }
 
-
 void setup() {
   Serial.begin(115200);//velocidade da porta serie
 }
@@ -84,7 +80,7 @@ void setup() {
 void loop() {
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= 10) {//a cada 10 ms fazer 1 amostragem do adc
-    sensorValue = analogRead(A3);// It takes about 100 microseconds (0.0001 s) to read an analog input, so the maximum reading rate is about 10,000 times a second.
+    sensorValue = analogRead(PIN_HEART);// It takes about 100 microseconds (0.0001 s) to read an analog input, so the maximum reading rate is about 10,000 times a second.
     previousMillis = currentMillis;
     signed long long int result = filterloop();//resultado do filtro, o filtro esta sempre a correr com os dados que vao chegando
     detect_bpm(result);
