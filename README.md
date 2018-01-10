@@ -41,12 +41,20 @@ Tiago Ferreira A71970<br>
   <br>
   <h3>Para o sensor de passos:</h3>
   <figure>
-  <img src="/images/final.png" alt="step_diagram" height="400">
+  <img src="/images/sku_154602_2.jpg" alt="mpu-6050" height="400">
   <figcaption>Fig2. - Implementação do sensor de passos.</figcaption>
 </figure>
   <br>
   
   <h3>Conceção, implementação e teste do sensor de batimento cardíaco. </h3>
+  FILTRO IMPLEMENTADO EM HARDWARE<br>
+  <p>Dado que a frequencia cardiaca se encontra entre os 0,83Hz(50 bpm) e os 5Hz(300bpm), dimensionamos o filtro em harware de forma a filtrar as frequencias fora desta gama.</p>
+  Fc= 1/(2*pi*R*C)
+  
+  Fc1=0.5Hz(passa alto)
+  Fc2=10Hz(passa baixo)
+  
+  
    <figure>
   <img src="/images/prints_relatorio/ldr_signal.png" alt="ldr_signal">
   <figcaption>Sinal do LDR</figcaption>
