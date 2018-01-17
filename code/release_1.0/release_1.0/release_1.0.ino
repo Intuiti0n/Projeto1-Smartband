@@ -203,13 +203,14 @@ void setup() {
     Wire.write(0);     // set to zero (wakes up the MPU-6050)
     Wire.endTransmission(true);
   }
+  /*
   // wait until the HC-05 has made a connection
   while (!BTconnected)
   {
     if ( digitalRead(BTpin) == HIGH)  {
       BTconnected = true;
     };
-  }
+  }*/
 }
 
 //main loop
@@ -262,9 +263,9 @@ void loop() {
       float filtro = STEP_filterloop(AcY * AcZ);
       steps(filtro);
 
-      Serial.print("E");
-      Serial.print((int) filtro);
-      Serial.print(",");
+      //Serial.print("E");
+      //Serial.print((int) filtro);
+      //Serial.print(",");
       Serial.println(step_counter);
 
       display.clearDisplay();

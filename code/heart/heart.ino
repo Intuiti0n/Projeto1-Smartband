@@ -91,11 +91,13 @@ void loop() {
     signed long long int result = filterloop();//resultado do filtro, o filtro esta sempre a correr com os dados que vao chegando
     detect_bpm(result);
 
-    //Serial.print("E");
-    //Serial.println(sensorValue);//valor lido diretamente do hardware
-    //Serial.println((double)result);//valor de saida do filtro digital
-    //Serial.print(" ");//para conseguir ver varias linhas no serial plotter
     Serial.print("E");
+    Serial.print(sensorValue);//valor lido diretamente do hardware
+    Serial.print(",");
+    Serial.print((double)result);//valor de saida do filtro digital
+    Serial.print(",");
+    //Serial.print(" ");//para conseguir ver varias linhas no serial plotter
+    //Serial.print("E");
     Serial.println(bpm_calc);//ver calculo dos BPM
     //Serial.print(",");
     //Serial.println((double)result);//valor de saida do filtro digital
